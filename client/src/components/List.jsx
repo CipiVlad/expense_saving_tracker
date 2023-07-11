@@ -1,0 +1,73 @@
+import { default as api } from '../store/apiSlice'
+import 'boxicons'
+import { useEffect } from 'react'
+//create obj for style
+// const obj = [
+//     {
+//         name: "Savings",
+//         color: "#f9c74f",
+//     },
+//     {
+//         name: "Investment",
+//         color: 'rgb(54, 162, 235)',
+//     },
+//     {
+//         name: "Expense",
+//         color: 'rgb(255, 99, 132)',
+
+//     }
+// ]
+
+
+
+
+const List = () => {
+
+    //Hook Object from apiSlice with State
+    const { data, isFetching, isSuccess, isError } = api.useGetLabelsQuery()
+    const [deleteTransaction] = api.useDeleteTransactionMutation()
+    let Transactions;
+
+    //Delete Handler
+    const handlerClick = (e) => {
+        if (!e.target.dataset.id) return 0;
+        deleteTransaction({ _id: e.target.dataset.id })
+    }
+
+    if (isFetching) {
+        Transactions = <div>Fetching</div>
+    } else if (isSuccess) {
+        Transactions = data.map((value, index) => <TransactionComponent key={index} category={value} handler={handlerClick} />
+        )
+    } else if (isError) {
+        Transactions = <div>Error</div>
+
+    }
+
+
+
+    return (
+        <div className="flex flex-col py-6 gap-3">
+            <h1 className="py-4 font-bold text-xl">History</h1>
+            {Transactions}
+        </div>
+    )
+}
+
+
+//Component
+function TransactionComponent({ category, handler }) {
+    if (!category) return null;
+    return (
+        <div className="item flex justify-center bg-gray-50 py-2 rounded-r" style={{ borderRight: `8px solid ${category.color ?? "#e5e5e5"}` }}>
+            <button className='px-3' onClick={handler}>
+                <box-icon data-id={category._id ?? ''} color={category.color ?? "#e5e5e5"} size="15px" name="trash" ></box-icon>
+            </button>
+            <span className='block w-full'>{category.name ?? ''}</span>
+        </div>
+    )
+}
+
+
+
+export default List
